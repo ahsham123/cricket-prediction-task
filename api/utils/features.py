@@ -7,6 +7,25 @@ BASIC_RAW_COLUMNS = ['total_runs', 'wickets', 'target', 'balls_left']
 TARGET_COLUMN = 'won'
 
 def add_cricket_features(df: pd.DataFrame, is_train: bool = True) -> pd.DataFrame:
+    """Create derived cricket run-chase features.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input frame containing at least the raw columns defined in
+        `BASIC_RAW_COLUMNS`.
+    is_train : bool, default True
+        If True and the target column `won` is present, the output keeps
+        `won` as the first column to simplify training workflows.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with engineered features such as `overs_left`,
+        `wickets_in_hand`, `current_run_rate`, `required_runs`,
+        `required_run_rate`, and several interaction terms. Infinite values
+        are replaced with NaN for downstream imputers to handle.
+    """
     out = df.copy()
     out['wickets'] = out['wickets'].clip(lower=0, upper=10)
     out['balls_left'] = out['balls_left'].clip(lower=0, upper=120)

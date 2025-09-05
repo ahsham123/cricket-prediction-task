@@ -7,6 +7,11 @@ from api.utils.llm import generate_response
 router = APIRouter(prefix="/llm", tags=["llm"])
 
 class LlmExplainRequest(BaseModel):
+    """Inputs for generating a natural-language explanation.
+
+    The LLM summarizes why the predicted outcome is plausible given the
+    inputs, referencing run rates, overs left, and wickets in hand.
+    """
     # inputs and predicted result only
     total_runs: float
     wickets: float
@@ -17,6 +22,7 @@ class LlmExplainRequest(BaseModel):
 
 @router.post("/predict")
 def llm_predict(payload: LlmExplainRequest):
+    """Return a concise model explanation using the configured OpenAI model."""
     try:
         system_prompt = (
             "You are an assistant that explains a cricket chase outcome prediction succinctly and clearly. "

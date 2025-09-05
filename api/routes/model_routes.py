@@ -20,6 +20,11 @@
  
  
  class PredictionRequest(BaseModel):
+     """Request schema for a single prediction.
+
+     Includes optional flags to control feature set selection and training
+     filters applied to the dataset before model fitting.
+     """
      # prediction inputs (single sample)
      total_runs: float
      wickets: float
@@ -40,6 +45,21 @@
  
  
  def build_pipelines(feature_columns: List[str]):
+     """Create preprocessing + classifier pipelines for numeric features.
+
+     The preprocessing step imputes missing values and standardizes features.
+     Returns pipelines for Logistic Regression and Random Forest.
+
+     Parameters
+     ----------
+     feature_columns : list[str]
+         The numeric feature columns to include in the pipelines.
+
+     Returns
+     -------
+     dict[str, Pipeline]
+         Mapping from model name to pipeline objects.
+     """
      ct = ColumnTransformer([
          ('num', Pipeline([
              ('impute', SimpleImputer(strategy='median')),
@@ -66,6 +86,12 @@
  
  @router.post('/predict')
  def predict(payload: PredictionRequest):
+     """Train a model on-the-fly (with optional filters) and predict one case.
+
+     Loads either the engineered or raw training dataset depending on
+     `use_engineered`, applies the provided filters, fits the selected model,
+     and returns the predicted class with probability.
+     """
      try:
          # single-row input
          input_df = pd.DataFrame([{
